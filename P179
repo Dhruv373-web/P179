@@ -1,0 +1,110 @@
+&lt;script src=&quot;https://aframe.io/releases/1.0.4/aframe.min.js&quot;&gt;&lt;/script&gt;
+○ &lt;script src=&quot;https://unpkg.com/aframe-look-at-
+component@0.8.0/dist/aframe-look-at-component.min.js&quot;&gt;&lt;/script&gt;
+○ &lt;script src=&quot;https://raw.githack.com/AR-js-
+org/AR.js/master/aframe/build/aframe-ar-nft.js&quot;&gt;&lt;/script&gt;
+let latitude, longitude, destination;
+
+$(document).ready(function () {
+    alert("Please allow the device to know your location!")
+    initGeolocation();
+})
+
+$(function () {
+    $("#navigate-button").click(function () {
+        window.location.href = `ar_navigation.html?source=${latitude};${longitude}&destination=${destination.lat};${destination.lng}`
+    })
+})
+
+function initGeolocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(success);
+    }
+    else {
+        alert("Sorry, your browser does not support geolocation services.");
+    }
+}
+
+function success(position) {
+    longitude = position.coords.longitude;
+    latitude = position.coords.latitude
+
+    // Initializing Mapbox
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYXBvb3J2ZWxvdXMiLCJhIjoiY2ttZnlyMDgzMzlwNTJ4a240cmEzcG0xNyJ9.-nSyL0Gy2nifDibXJg4fTA';
+
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [longitude, latitude],
+        zoom: 16
+    });
+
+    map.addControl(
+        new mapboxgl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: true
+        })
+    );
+
+    map.addControl(
+        new MapboxDirections({
+            accessToken: mapboxgl.accessToken
+        }),
+        'top-left'
+    );
+
+    map.on('click', function (e) {
+        destination = e.lngLat;
+    });
+}
+let coordinates = {}
+
+$(document).ready(function () {
+    get_coordinates();
+})
+
+function get_coordinates() {
+    let searchParams = new URLSearchParams(window.location.search)
+    if (searchParams.has('source') && searchParams.has('destination')) {
+        let source = searchParams.get('source')
+        let destination = searchParams.get('destination')
+        coordinates.source_lat = source.split(";")[0]
+        coordinates.source_lon = source.split(";")[1]
+        coordinates.destination_lat = destination.split(";")[0]
+        coordinates.destination_lon = destination.split(";")[1]
+    } else {
+        alert("Coordinates not selected!")
+        window.history.back();
+    }
+}
+<meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+
+    <title>Navigation</title>
+
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"
+        integrity="sha384-LtrjvnR4Twt/qOuYxE721u19sVFLVSA4hf/rRt6PrZTmiPltdZcI7q7PXQBYTKyf"
+        crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+
+    <!-- CSS and JS -->
+    <link rel="stylesheet" href="./ar_navigation.css" />
+    <script src="./ar_navigation.js" type="text/javascript"></script>
+
+</body>
+
+</html>
